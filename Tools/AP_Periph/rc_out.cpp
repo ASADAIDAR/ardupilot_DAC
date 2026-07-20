@@ -83,6 +83,10 @@ void AP_Periph_FW::rcout_init()
 #if HAL_WITH_ESC_TELEM
     esc_telem_update_period_ms = 1000 / constrain_int32(g.esc_telem_rate.get(), 1, 1000);
 #endif
+
+    // Initialize servo DAC handler
+    // PWM channel 0 (PA0), DAC channel 0 (PA4)
+    servo_dac.init(0, 0);
 }
 
 void AP_Periph_FW::rcout_init_1Hz()
@@ -136,6 +140,12 @@ void AP_Periph_FW::rcout_srv_PWM(uint8_t actuator_id, const float command_value)
     actuator.mask |= SRV_Channels::get_output_channel_mask(function);
 
     rcout_has_new_data_to_update = true;
+    
+    // Set servo position in DAC handler if this is actuator 1
+    if (actuator_id == 1) {
+        servo_dac.set_servo_position(uint16_t(command_value));
+    }
+
 #if AP_SIM_ENABLED
     sim_update_actuator(actuator_id);
 #endif
@@ -199,6 +209,10 @@ void AP_Periph_FW::rcout_update()
     srv.cork();
     SRV_Channels::output_ch_all();
     srv.push();
+    
+    // Update servo DAC outputs
+    servo_dac.update();
+    
 #if HAL_WITH_ESC_TELEM
     if (now_ms - last_esc_telem_update_ms >= esc_telem_update_period_ms) {
         last_esc_telem_update_ms = now_ms;
