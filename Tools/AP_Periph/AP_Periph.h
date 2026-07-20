@@ -45,6 +45,7 @@
 #include "actuator_telem.h"
 #include "networking.h"
 #include "serial_options.h"
+#include "servo_dac.h"
 #if AP_SIM_ENABLED
 #include <SITL/SITL.h>
 #endif
@@ -77,7 +78,7 @@
 
 #include "esc_apd_telem.h"
 
-#define AP_PERIPH_HAVE_LED_WITHOUT_NOTIFY (defined(HAL_PERIPH_NEOPIXEL_COUNT_WITHOUT_NOTIFY) || AP_PERIPH_NCP5623_LED_WITHOUT_NOTIFY_ENABLED || AP_PERIPH_NCP5623_BGR_LED_WITHOUT_NOTIFY_ENABLED || AP_PERIPH_TOSHIBA_LED_WITHOUT_NOTIFY_ENABLED)
+#define AP_PERIPH_HAVE_LED_WITHOUT_NOTIFY (defined(HAL_PERIPH_NEOPIXEL_COUNT_WITHOUT_NOTIFY) || AP_PERIPH_NCP5623_LED_WITHOUT_NOTIFY_ENABLED || AP_PERIPH_NCP5623_BGR_LED_WITHOUT_NOTIFY_ENABLED || [...]
 
 #if AP_PERIPH_NOTIFY_ENABLED
     #if AP_PERIPH_BUZZER_WITHOUT_NOTIFY_ENABLED
@@ -384,6 +385,9 @@ public:
     void rcout_srv_PWM(const uint8_t actuator_id, const float command_value);
     void rcout_update();
     void rcout_handle_safety_state(uint8_t safety_state);
+    
+    // Servo DAC handler for PWM and DAC output
+    ServoDACHandler servo_dac;
 #endif
 
 #if AP_SERVO_TELEM_ENABLED
